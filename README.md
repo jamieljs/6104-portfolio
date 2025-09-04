@@ -1,16 +1,14 @@
-# Template Portfolio
-This will be your portfolio repository. Use this as a [template repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-template-repository) and customize it to your own tastes. We gave you a starting point with a space to describe yourself and a link to where your assignment 1 file can be.
+# 6.104 Portfolio
 
-# About Me
-*My name is Amber Horvath, I'm a postdoctoral associate researching code comprehension interventions, it's nice to meet you! [Here is a link to my real website.](https://amberhorvath.com)
-Now you should write something about yourself here!*
+## About Me
+*Hi! I'm Jamie Lim, a sophomore interested in computer science, math, and music technology. I’m curious about how computation and creativity intersect, from algorithms and systems to sound synthesis and design. Nice to meet you!*
 
 Some fun facts about me:
-1. I love hockey.
-2. I do pottery.
-3. I have an extra bone in my right foot.
+1. My favorite animal is the hedgehog.
+2. I used to play netball in my home country (Singapore); currently I kick people (and air) with the MIT Sport Taekwondo Club and dance with MIT Asian Dance Team.
+3. I have 2 older sisters.
 
-![picture of snow leopard mama and baby](https://pbs.twimg.com/media/GzYlia3XMAAWfm4?format=jpg&name=4096x4096)
+![hedgehog](https://vetmed.illinois.edu/wp-content/uploads/2021/04/pc-keller-hedgehog.jpg)
 
 
 # Table of Contents
