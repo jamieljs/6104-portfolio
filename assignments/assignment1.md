@@ -131,9 +131,9 @@ However, they may worry about patients over-relying on the tool, especially if i
 5. [TripIt](https://www.tripit.com/web): This app organizes travel details (compiled by forwarding booking confirmation emails) into shareable itineraries with real-time updates. It does not seem to plan specific activities and primarily focuses on making sure you don't miss anything you've already booked.
 6. [SplitWise](https://www.splitwise.com/): SplitWise is an expense tracking app for group trips and other situations like living with housemates.
 7. [Vaiage: A Multi-Agent Solution to Personalized Travel Planning](https://arxiv.org/abs/2505.10922?utm_source=chatgpt.com): Recent research on LLM-driven travel planning, which seems something like an AI travel agent.
-8. [](): sentence
-9. [](): sentence
-10. [](): sentence
+8. [r/travelhacks: Best way to plan group trip?](https://www.reddit.com/r/TravelHacks/comments/1hdh498/best_way_to_plan_group_trip/): suggestions that netizens have come up with for streamlining the process of planning group trips; these could be useful when designing the flow of the app
+9. [How to Plan an Awesome Group Trip – 4 Different Options](https://jamboguides.com/how-to-plan-an-awesome-group-trip-4-different-options/): more tips for planning group trips
+10. [Here’s Why I Stopped Planning Group Trips and Activities](https://hellolinda.medium.com/heres-why-i-stopped-planning-group-trips-and-activities-d626cdab1017): describes frustrations of being a trip organizer and presents the idea that if a planner decides not to do trip planning, someone else might eventually take the initiative to coordinate something
 
 ### Selected Problem 2: Prioritizing tasks in the moment
 1. [Decision fatigue](https://en.wikipedia.org/wiki/Decision_fatigue): explains how making many decisions impairs cognitive self-control and persistence, reinforcing the need for support in prioritization
@@ -143,25 +143,21 @@ However, they may worry about patients over-relying on the tool, especially if i
 5. [Trello](https://trello.com): a web-based project management application employing a Kanban-style workflow for organizing and tracking projects
 6. [Notion](https://www.notion.com/): AI workspace for organizing notes/projects/tasks
 7. [Todoist](https://www.todoist.com/): to-do list app with checkboxes, due dates, reminders and priority assignments
-8. [](): sentence
-9. [](): sentence
-10. [](): sentence
+8. [SkedPal](https://www.skedpal.com/): AI calendar that turns to-do lists into a personalized time-blocked schedule
+9. [What Is Task Prioritization?](https://www.monitask.com/en/business-glossary/task-prioritization): presents common task prioritization techniques and pitfalls which could be the basis for new features to hedge against such pitfalls
+10. [Why We Struggle to Prioritize](https://eleganthack.com/why-we-struggle-to-prioritize/): key reasons behind why it is difficult to prioritize tasks and strategies to overcome it
 
 ### Selected Problem 3: Meal planning for diabetics
-1. [](): sentence
-2. [](): sentence
-3. [](): sentence
-4. [](): sentence
-5. [](): sentence
-6. [](): sentence
-7. [](): sentence
-8. [](): sentence
-9. [](): sentence
-10. [](): sentence
-
-evidence for or against it (how much it matters, how many users might be affected, etc)
-comparables (related or prior attempts at solving the problem) and their limitations
-Wikipedia articles, newspaper articles, blog posts, Q&A forums, quantitative
+1. [Changes in Glycemic Control Among Individuals With Diabetes Who Used a Personalized Digital Nutrition Platform: Longitudinal Study](https://diabetes.jmir.org/2021/4/e32298?utm_source=chatgpt.com): a study of the Foodsmart platform, which offers personalized recipes, planning and grocery discounts, found improvements in self-reported HbA1c levels over time
+2. [Personalised Nutritional Recommendations Based on Individual Post-Prandial Glycaemic Responses Improve Glycaemic Metrics and PROMs in Patients with Type 2 Diabetes: A Real-World Assessment ](https://www.mdpi.com/2072-6643/14/10/2123?utm_source=chatgpt.com): a real-world intervention with personalized nutritional advice significantly improved glycemic control and motivation in Type 2 diabetics
+3. [REffects of personalized diets by prediction of glycemic responses on glycemic control and metabolic health in newly diagnosed T2DM: a randomized dietary intervention pilot trial](https://bmcmedicine.biomedcentral.com/articles/10.1186/s12916-022-02254-y?utm_source=chatgpt.com): for newly diagnosed Type 2 diabetics, personalized diets based on predicted glycemic responses led to better metabolic outcomes than standard Mediterranean-style diets
+4. [MealMeter: Using Multimodal Sensing and Machine Learning for Automatically Estimating Nutrition Intake](https://arxiv.org/abs/2503.11683?utm_source=chatgpt.com): uses multimodal data (glucose sensors, heart rate sensors, motion sensors, environmental cues) to estimate macronutrient intake; shows potential for automating meal tracking for diabetics
+5. [NutriGen: Personalized Meal Plan Generator Leveraging Large Language Models to Enhance Dietary and Nutritional Adherence](https://arxiv.org/abs/2502.20601?utm_source=chatgpt.com): generates plans aligned with user-defined calorie targets with high accuracy using LLMs and USDA references
+6. [Simplified Meal Announcement Versus Precise Carbohydrate Counting in Adolescents With Type 1 Diabetes Using the MiniMed 780G Advanced Hybrid Closed Loop System: A Randomized Controlled Trial Comparing Glucose Control](https://diabetesjournals.org/care/article/46/3/544/148250/Simplified-Meal-Announcement-Versus-Precise?utm_source=chatgpt.com): study showing that carbohydrate counting is still useful even in the age of closed-loop insulin delivery systems
+7. [Bridging the Gap in Carbohydrate Counting With a Mobile App: Needs Assessment Survey](https://www.jmir.org/2025/1/e63278?utm_source=chatgpt.com): a 39-question web-based survey (closed- and open-ended) was conducted o identify barriers in carbohydrate counting, preferred carbohydrate counting app features and current app use. Desired features that are typically not available include photo recognition, reliable nutrient values, personalized bolus calculations
+8. [American Diabetes Assoc. meal plans](https://www.americandiabetessociety.org/meal-plans?utm_source=chatgpt.com): offers structured weekly diabetes-friendly plans and grocery lists (e.g. Mediterranean, low-carb, quick), demonstrating precedent for templated plans; however, these plans are static (PDF files)
+9. [Diabetes Food Hub “Plan My Meals”](https://diabetesfoodhub.org/plan-my-meals?utm_source=chatgpt.com): drag-and-drop meal planner combined with recipe database allowing customization of weekly diabetic-friendly meals
+10. [Carbs & Cals](https://carbsandcals.com/): dieting and calorie-counting app which includes carbohydrate information
 
 ## Features
 ### Selected Problem 1: Coordinating group travel preferences
