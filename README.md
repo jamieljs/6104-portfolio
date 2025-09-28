@@ -8,10 +8,11 @@ Some fun facts about me:
 2. I used to play netball in my home country (Singapore); currently I kick people (and air) with the MIT Sport Taekwondo Club and dance with MIT Asian Dance Team.
 3. I have 2 older sisters.
 
-![hedgehog](https://vetmed.illinois.edu/wp-content/uploads/2021/04/pc-keller-hedgehog.jpg)
+![hedgehog](assets/hedgehog.jpg)
 
 
 # Table of Contents
 - [Link to Assignment 1](assignments/assignment1.md)
 - [Link to Problem Set 1](assignments/pset1.md)
 - [Link to Problem Set 2](assignments/pset2.md)
+- [Link to Assignment 2](assignments/assignment2.md)
