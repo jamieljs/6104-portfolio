@@ -43,11 +43,228 @@ Finally, NexTask includes **Energy-saving Mode**, a simple toggle that adapts yo
 With NexTask, the decision fatigue of constant prioritization disappears. You’ll always know what’s most important, how to start and how to keep going. Stop stressing and guessing; start doing.
 
 ## Concept Design
-Design a set of concepts that will embody the functionality of your app and deliver its features. We expect you to have 3-5 concepts. Fewer than 3 concepts would probably mean limited functionality or a lack of separation of concerns; more than 5 likely suggests overambition or lack of focus. (Talk to us if you think you need more!) The deliverables are:
+### Concepts
 
-    The concept specifications, written in the standard form.
-    Some essential synchronizations. You do not need an exhaustive collection of synchronizations, but should capture (a) any essential design ideas that involve multiple concepts; (b) representative syncs for kinds of sync that are common throughout your application (such as syncs for access control or notification).
-    A brief note, at most half a page long, explaining the role that your concepts play in the context of the app as a whole. For example, if you have an authentication or authorization concept, you should say how it’s used to control access to other particular concepts. You should also explain how generic type parameters will be instantiated whenever it’s non obvious. (For example, that a generic user type will be bound to the users of an authentication concept is obvious; that the targeted items of an upvoting concept are users would not be.)
+**concept** Task[User]\
+**purpose** each Task represents a unit of work that the user may need to complete\
+**principle** a user may create a task, or it may be created as a subtask of another task by the user or the system. A task has attributes that can be used to schedule it/determine when it should be done.\
+**state**\
+&nbsp;&nbsp;a set of Tasks with\
+&nbsp;&nbsp;&nbsp;&nbsp;an owner User\
+&nbsp;&nbsp;&nbsp;&nbsp;a title String\
+&nbsp;&nbsp;&nbsp;&nbsp;a description String\
+&nbsp;&nbsp;&nbsp;&nbsp;a dueDate DateTime\
+&nbsp;&nbsp;&nbsp;&nbsp;a duration Number\
+&nbsp;&nbsp;&nbsp;&nbsp;a priority Number\
+&nbsp;&nbsp;&nbsp;&nbsp;a difficulty Number\
+&nbsp;&nbsp;&nbsp;&nbsp;a status of TODO, IN_PROGRESS or DONE\
+**actions**\
+&nbsp;&nbsp;createTask(user: User, title: String, description: String, dueDate: DateTime, duration: Number, priority: Number, difficulty: Number): (task: Task)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** add a new Task to the set of Tasks with given attributes and status = TODO\
+&nbsp;&nbsp;updateTask(task: Task, title?: String, dueDate?: DateTime, duration?: Number, priority?: Number, difficulty?: Number): (updatedTask: Task)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** for each of the optional arguments, update the given task in the set of Tasks with the new value, then return the updated Task\
+&nbsp;&nbsp;completeTask(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists and its status = TODO or IN_PROGRESS\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** set task.status to DONE\
+&nbsp;&nbsp;progressTask(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists and its status = TODO\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** set task.status to IN_PROGRESS\
+&nbsp;&nbsp;deleteTask(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** delete the given task from the set of tasks\
+&nbsp;&nbsp;getTasksOwnedBy(user: User): (tasks: set of Tasks)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** return the set of all tasks such that task.owner = user
+
+---
+
+**concept** SubtaskBreakdown[Task]\
+**purpose** allows a large, complex task to be decomposed into smaller subtasks; keeps track of parent-child task relations\
+**principle** a user either requests to automatically generate subtasks for a task, or adds subtasks manually. Subtasks initially inherit attributes from their parent task but these can be changed as long as the due date does not go beyond the parent task due date\
+**state**\
+&nbsp;&nbsp;a Decomposed set of Tasks with\
+&nbsp;&nbsp;&nbsp;&nbsp;an optional parent Task\
+&nbsp;&nbsp;&nbsp;&nbsp;a children seq of Tasks\
+&nbsp;&nbsp;&nbsp;&nbsp;a completedChildren Number\
+**actions**\
+&nbsp;&nbsp;autoBreakdown(task: Task): (children: set of Tasks)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task does not exist in the Decomposed set, or it exists but task.children is empty\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** if task is not in Decomposed, add it to Decomposed with unassigned parent. Automatically generate a sequence of subtasks (Tasks, created with the Task concept above) based on the given task's title, description and other attributes. set task.children to this sequence, then return this sequence\
+&nbsp;&nbsp;addSubtask(task: Task, child: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists in the Decp,[psed] set and child does not exist in task.children\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** append child at the end of task.children\
+&nbsp;&nbsp;reorderSubtasks(task: Task, newChildren: seq of Tasks): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists in the Decomposed set and newChildren is a permutation of task.children\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** set task.children = newChildren\
+&nbsp;&nbsp;incrementCompletedChildren(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists in the Decomposed set with status = TODO or IN_PROGRESS, task.completedChildren < length of task.children\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** increase task.completedChildren by 1\
+&nbsp;&nbsp;decrementCompletedChildren(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** task exists in the Decomposed set with status = IN_PROGRESS or DONE, task.completedChildren > 0\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** decrease task.completedChildren by 1\
+&nbsp;&nbsp;isTaskLeaf(task: Task): (leaf: Boolean)\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** return true if (task exists in the Decomposed set and task.children is empty), or if task does not exist in Decomposed; return false otherwise
+
+---
+
+**concept** TaskRanker[User, Task]\
+**purpose** computes and maintains a prioritized ordering of a user’s tasks\
+**principle** when a user adds, edits or completes a task, a ranked sequence of "leaf" subtasks (that is, a list of all the Tasks who have no children, in the order that the system recommends to complete them) is produced by using task attributes, subtask relations and user's energy state\
+**state**\
+&nbsp;&nbsp;a set of TaskRankers with\
+&nbsp;&nbsp;&nbsp;&nbsp;an owner User\
+&nbsp;&nbsp;&nbsp;&nbsp;a ranked seq of Tasks\
+&nbsp;&nbsp;&nbsp;&nbsp;a lastUpdated DateTime\
+**actions**\
+&nbsp;&nbsp;getCurrentLeafTasks(user: User): (tasks: set of Tasks)\
+&nbsp;&nbsp;&nbsp;&nbsp; **requires** user exists\
+&nbsp;&nbsp;&nbsp;&nbsp; **effects** get the list of all tasks owned by this user with Task.getTasksOwnedBy(user), then for each task in that list, check whether SubtaskBreakdown.isTaskLeaf(task). Return the set of tasks for which the output of isTaskLeaf is true.\
+&nbsp;&nbsp;computeRankings(user: User, currentEnergyState: Number): (changed: Boolean)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and one TaskRanker exists with ranker.owner = user\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** set ranker.lastUpdated to the current time, and update ranker.ranked to a new ordering of the leaf tasks owned by the user (from TaskRanker.getCurrentLeafTasks(user)), based on the given currentEnergyState. Return true if and only if ranker.ranked changed from its previous value.\
+&nbsp;&nbsp;getRankedTaskList(user: User): (tasks: seq of Tasks)\
+&nbsp;&nbsp;&nbsp;&nbsp; **requires** user exists and one TaskRanker exists with ranker.owner = user\
+&nbsp;&nbsp;&nbsp;&nbsp; **effects** returns ranker.ranked
+
+---
+
+**concept** EnergySavingMode[User]\
+**purpose** adapts task ranking to the user’s current energy or focus level by temporarily prioritizing lighter, less demanding tasks\
+**principle** users can manually toggle energy-saving mode. When enabled, rankings will temporarily de-emphasize high-effort tasks to help prevent burnout. Enabling this mode has a timeout until the user can next enable it.\
+**state**\
+&nbsp;&nbsp;a set of EnergySavingModes with\
+&nbsp;&nbsp;&nbsp;&nbsp;a user User\
+&nbsp;&nbsp;&nbsp;&nbsp;an enabled Boolean\
+&nbsp;&nbsp;&nbsp;&nbsp;a lastEnabled DateTime\
+**actions**\
+&nbsp;&nbsp;toggleEnergyState(user: User): (enabled: Boolean)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and an EnergySaverMode mode exists such that mode.user = user; mode.enabled = true, or (mode.enabled = false and lastEnabled is no less than 6 hours ago)\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** toggle mode.enabled (set it to true if it was false and vice versa); if it was previously false, set mode.lastEnabled to the current time; return new mode.enabled\
+&nbsp;&nbsp;getCurrentEnergyState(user: User): (enabled: Boolean)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and an EnergySaverMode mode exists such that mode.user = user\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** returns mode.enabled
+
+---
+
+**concept** ScheduleRankedTasks[User, Task]\
+**purpose** allows the user’s ranked tasks to be assigned to calendar slots\
+**principle** each user has a Schedule of their ranked tasks. Scheduling respects the order given by TaskRanker while also considering task attributes (due date, duration) and the user’s blocked times. The user will be able to view a calendar plan rather than just a ranked list.\
+**state**\
+&nbsp;&nbsp;a set of TimeIntervals each with\
+&nbsp;&nbsp;&nbsp;&nbsp;a start DateTime\
+&nbsp;&nbsp;&nbsp;&nbsp;an end DateTime\
+&nbsp;&nbsp;an AssignedIntervals set of TimeIntervals each with\
+&nbsp;&nbsp;&nbsp;&nbsp;a task Task\
+&nbsp;&nbsp;a set of Schedules with\
+&nbsp;&nbsp;&nbsp;&nbsp;an owner User\
+&nbsp;&nbsp;&nbsp;&nbsp;an assigned set of AssignedIntervals\
+&nbsp;&nbsp;&nbsp;&nbsp;a blocked set of TimeIntervals\
+&nbsp;&nbsp;&nbsp;&nbsp;a lastUpdated DateTime\
+**actions**\
+&nbsp;&nbsp;assignTask(task: Task, start: DateTime, end: DateTime): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** schedule exists in the set of Schedules with schedule.owner = task.owner; interval (start, end) does not overlap with any blocked interval in schedule.blocked or any AssignedInterval in schedule.assigned\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** add a new AssignedInterval with task, start, end to schedule.assigned; set schedule.lastUpdated to current time\
+&nbsp;&nbsp;unassignTask(task: Task): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** schedule exists in the set of Schedules with schedule.owner = task.owner; task is assigned to some AssignedInterval in schedule.assigned\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** remove the AssignedInterval for this task from schedule.assigned; set lastUpdated to current time\
+&nbsp;&nbsp;blockTime(user: User, start: DateTime, end: DateTime): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and schedule exists in the set of Schedules with schedule.owner = user; interval (start, end) does not overlap with any AssignedInterval in schedule.assigned\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** add a TimeInterval (start, end) to blocked (if there is an overlap, merge the overlapping intervals); set lastUpdated to current time\
+&nbsp;&nbsp;freeTime(user: User, start: DateTime, end: DateTime): (void)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and schedule exists in the set of Schedules with schedule.owner = user; interval (start, end) exists or is a subset of an interval in schedule.blocked\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** if necessary, split the larger blocked interval into smaller blocked intervals to isolate the given (start, end) to be freed; remove the given (start, end) from schedule.blocked; set lastUpdated to current time\
+&nbsp;&nbsp;scheduleRankedTasks(user: User): (valid: Boolean)\
+&nbsp;&nbsp;&nbsp;&nbsp;**requires** user exists and schedule exists in the set of Schedules with schedule.owner = user\
+&nbsp;&nbsp;&nbsp;&nbsp;**effects** get TaskRanker.getRankedTaskList(user); iterate over this list and for each task, assign it into the earliest available TimeInterval before its dueDate, avoiding blocked and already assigned intervals; update schedule.assigned accordingly; set lastUpdated to current time; return true if it was possible to fit all tasks before their due date and false otherwise
+
+### Synchronizations
+**sync** updateParentStatusOnComplete\
+**when**\
+&nbsp;&nbsp;Task.completeTask(task)\
+**then**\
+&nbsp;&nbsp;if task has a parent, Task.progressTask(parent) and SubtaskBreakdown.incrementCompletedChildren(parent)\
+&nbsp;&nbsp;if task has children, for each child in task.children: Task.completeTask(child)
+
+---
+
+**sync** completeTaskWhenChildrenDone\
+**when**\
+&nbsp;&nbsp;SubtaskBreakdown.incrementCompletedChildren(task)\
+**then**\
+&nbsp;&nbsp;if task.completedChildren = length of task.children, Task.completeTask(task)
+
+---
+
+**sync** cascadeDeleteChildren\
+**when**\
+&nbsp;&nbsp;Task.deleteTask(task)\
+**then**\
+&nbsp;&nbsp;if task has children, for each child in task.children: Task.deleteTask(child)\
+&nbsp;&nbsp;if task has a parent and parent.completedChildren = length of parent.children, Task.completeTask(parent)
+
+---
+
+**sync** rerankOnTaskCreate\
+**when**\
+&nbsp;&nbsp;Task.createTask(user, ...)\
+**then**\
+&nbsp;&nbsp;TaskRanker.computeRankings(user, EnergySavingMode.getCurrentEnergyState(user))
+
+---
+
+**sync** rerankOnTaskDelete\
+**when**\
+&nbsp;&nbsp;Task.deleteTask(task)\
+**then**\
+&nbsp;&nbsp;TaskRanker.computeRankings(task.owner, EnergySavingMode.getCurrentEnergyState(task.owner))
+
+---
+
+**sync** rerankOnTaskComplete\
+**when**\
+&nbsp;&nbsp;Task.completeTask(task)\
+**then**\
+&nbsp;&nbsp;TaskRanker.computeRankings(task.owner, EnergySavingMode.getCurrentEnergyState(task.owner))
+
+---
+
+**sync** rerankOnTaskUpdate\
+**when**\
+&nbsp;&nbsp;Task.updateTask(task, ...)\
+**then**\
+&nbsp;&nbsp;TaskRanker.computeRankings(task.owner, EnergySavingMode.getCurrentEnergyState(task.owner))
+
+---
+
+**sync** rescheduleOnRankingUpdate\
+**when**\
+&nbsp;&nbsp;TaskRanker.computeRankings(user, currentEnergyState): (changed)\
+**then**\
+&nbsp;&nbsp;if changed = true, ScheduleRankedTasks.scheduleRankedTasks(user)
+
+---
+
+**sync** createTaskRankerOnUserCreate\
+**when**\
+&nbsp;&nbsp;User.register(): (user)\
+**then**\
+&nbsp;&nbsp;TaskRanker.create(user)
+
+---
+
+**sync** recomputeOnEnergyChange\
+**when**\
+&nbsp;&nbsp;EnergySavingMode.toggleEnergyState(user)\
+**then**\
+&nbsp;&nbsp;TaskRanker.computeRankings(user, currentEnergyState)\
+
+
+### Note
+These concepts together form the backbone of how NexTask transforms the user's to-do list into a ranked schedule. The `Task[User]` concept provides the foundation by defining each unit of work with its attributes. The `SubtaskBreakdown[Task]` concept extends this by supporting relationships between parent and child tasks, allowing complex tasks to be broken down into smaller subtasks. Synchronizations ensure that progress flows naturally across the hierarchy: when subtasks are completed or deleted, their parent/child tasks are updated accordingly.
+
+The `TaskRanker[User, Task]` concept ensures that users see their tasks in a clear order in which they should be completed, producing a prioritized sequence of the "leaf" tasks in the hierarchy, based on attributes. `TaskRanker` also helps the `ScheduleRankedTasks[User, Task]` concept to convert the ranking into a calendar plan that respects deadlines and blocked intervals. The `EnergySavingMode[User]` concept influences these rankings by temporarily scheduling lighter tasks first when the user signals low energy. Synchronizations connect these concepts so that a change in rank order triggers rescheduling of tasks, toggling energy-saving mode triggers a recomputation of rankings, and rankings also update when tasks are created, edited or deleted.
 
 ## UI Sketches
 ![UI Sketch](../assets/ui_sketches.png)
@@ -59,7 +276,7 @@ They open NexTask and land on the home screen wireframe, which immediately highl
 
 After finishing the outline earlier than the predicted duration, the user checks it off in the app; the next task on the Home Screen changes. The user glances at the calendar view, which has adjusted to schedule the next task to begin after a 5-minute break instead of the timing based on the original duration.
 
-Later in the evening, the user’s energy dips. Instead of pushing through and risking burnout, they taps the energy toggle on the Home Screen. Instantly, the app shifts to suggest a lighter activity: “Draft three slides for the club meeting.” This allows the user to keep momentum without draining themselves fully.
+Later in the evening, the user’s energy dips. Instead of pushing through and risking burnout, they taps the energy toggle on the Home Screen. The app shifts to suggest a lighter activity for the immediate future: “Draft three slides for the club meeting.” This allows the user to keep momentum without draining themselves fully.
 
 Over the week, the user gets assigned a new essay project. They add it as a task in NexTask and select the checkbox to automatically split the long essay assignment into smaller steps like “Find sources,” “Write intro” or “Write body paragraphs.” Each subtask shows up in the calendar view, fitting neatly between classes, meetings and other tasks. By Friday, the user has made steady progress across all responsibilities instead of cramming at the last minute.
 
